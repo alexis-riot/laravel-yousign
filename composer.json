@@ -1,0 +1,35 @@
+{
+    "name": "alexis-riot/laravel-yousign",
+    "description": "Laravel wrapper for the YouSign API",
+    "keywords": [
+        "laravel",
+        "laravel 8.x",
+        "yousign"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexis Riot",
+            "email": "contact@alexisriot.fr"
+        }
+    ],
+    "require": {
+	    "guzzlehttp/guzzle": "^7.0.1",
+        "php": "^7.3|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AlexisRiot\\Yousign\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AlexisRiot\\Yousign\\YousignServiceProvider"
+            ],
+            "aliases": {
+                "Yousign": "AlexisRiot\\Yousign\\Facades\\Yousign"
+            }
+        }
+    }
+}
