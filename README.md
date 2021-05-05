@@ -26,13 +26,49 @@ return [
 
 ## Usage
 
-### Charges
+### Users
 
 Lists all users:
 ```php
 use AlexisRiot\Yousign\Facades\Yousign;
 
 $users = Yousign::getUsers();
+```
+
+### Procedure
+
+Send a file:
+```php
+use AlexisRiot\Yousign\Facades\Yousign;
+
+$file = Yousign::createFile([
+    "name" => "devis.pdf",
+    "content" => "JVBERi0xLjUKJb/3ov4KNiA...",
+]);
+```
+
+Create a procedure:  
+_The creation of a procedure is fully dynamic, you can add multiple members and multiple files._
+```php
+use AlexisRiot\Yousign\Facades\Yousign;
+use AlexisRiot\Yousign\YousignProcedure;
+
+$file = Yousign::createFile([
+    "name" => "devis.pdf",
+    "content" => "JVBERi0xLjUKJb/3ov4KNiA...",
+]);
+
+$procedure = new YousignProcedure();
+$procedure
+    ->withName("My procedure")
+    ->withDescription("The description of my procedure")
+    ->addMember([
+        'firstname' => "Alexis",
+        'lastname' => "Riot",
+        'email' => "contact@alexisriot.fr",
+        'phone' => "+33 600000000",
+    ], [$file])
+    ->send();
 ```
 
 ## License

@@ -48,7 +48,7 @@ class Yousign
     /**
      * @return string
      */
-    public function getBaseURL()
+    protected function getBaseURL()
     {
         return self::BASE_URI[$this->apiEnv];
     }
@@ -64,7 +64,7 @@ class Yousign
     /**
      * @param string $apiKey
      */
-    public function setApiKey($apiKey)
+    protected function setApiKey($apiKey)
     {
         $this->apiKey = $apiKey;
     }
@@ -81,7 +81,7 @@ class Yousign
     /**
      * @return string
      */
-    public function getApiEnv()
+    protected function getApiEnv()
     {
         return $this->apiEnv;
     }
@@ -95,12 +95,15 @@ class Yousign
      * @param null|array $params
      * @return array
      */
-    public function makeRequest(string $method, string $uri, array $query = [], array $params = [])
+    protected function makeRequest(string $method, string $uri, array $query = [], array $params = [])
     {
         try {
             $response = $this->client->request($method, $uri, ['query' => $query, 'body' => json_encode($params)]);
             return json_decode((string) $response->getBody(), true);
         } catch(GuzzleException $e) {
+            $response = json_decode($e->getResponse()->getBody()->getContents(), true);
+
+            dd($response);
             Log::error($e->getMessage());
         }
     }
@@ -114,5 +117,27 @@ class Yousign
     public function getUsers()
     {
         return $this->makeRequest('get', 'users');
+    }
+
+    /**
+     * Send file for procedure.
+     *
+     * @param null|array $query
+     * @return array
+     */
+    public function createFile(array $params = [])
+    {
+        return $this->makeRequest('POST', 'files', [], $params);
+    }
+
+    /**
+     * Lists all users.
+     *
+     * @param null|array $query
+     * @return array
+     */
+    public function createBasicProcedure(array $params = [])
+    {
+        return $this->makeRequest('post', 'procedures', [], $params);
     }
 }
