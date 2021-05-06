@@ -140,4 +140,45 @@ class Yousign
     {
         return $this->makeRequest('post', 'procedures', [], $params);
     }
+
+    /**
+     * Lists all users.
+     *
+     * @param string $memberId
+     * @return string
+     */
+    private function formatMemberId(string $memberId) {
+        return str_replace("/members/", "", $memberId);
+    }
+
+    /**
+     * Create an SMS operation that will send an SMS to the member with the code.
+     *
+     * @param null|array $query
+     * @return array
+     */
+    public function createOperationSMS($memberId)
+    {
+        return $this->makeRequest('post', 'operations', [], [
+            "mode" => "sms",
+            "type" => "accept",
+            "members" => [
+                "/members/{$this->formatMemberId($memberId)}",
+            ],
+            "metadata" => [],
+        ]);
+    }
+
+    /**
+     * Validate the SMS code received.
+     *
+     * @param null|array $query
+     * @return array
+     */
+    public function authenticateSMS($memberId, $code)
+    {
+        return $this->makeRequest('put', "authentications/sms/{$this->formatMemberId($memberId)}", [], [
+            "code" => $code,
+        ]);
+    }
 }

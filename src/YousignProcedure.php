@@ -9,6 +9,8 @@ class YousignProcedure
 
     private $members = [];
 
+    private $request;
+
     public function __construct()
     {
         $this->datas = (object) [
@@ -60,13 +62,23 @@ class YousignProcedure
         return [
             "file" => $file['id'],
             "page" => $file['page'] ?? 1,
-            "position" => $file['position'] ?? "",
+            "position" => is_string($file['position']) ? $file['position'] : "230,499,464,589",
             "mention" => $file['mention'] ?? "",
             "mention2" => $file['mention2'] ?? "",
         ];
     }
 
-    public function send() {
-        return \AlexisRiot\Yousign\Facades\Yousign::createBasicProcedure((array) $this->datas);
+    public function create() {
+        return $this->request = \AlexisRiot\Yousign\Facades\Yousign::createBasicProcedure((array) $this->datas);
+    }
+
+    public function getMember(): object {
+        return count($this->request['members']) === 1
+            ? (object) $this->request['members'][0]
+            : (object) $this->request['members'];
+    }
+
+    public function request() {
+        return $this->request;
     }
 }
