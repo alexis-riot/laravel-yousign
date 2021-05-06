@@ -101,9 +101,6 @@ class Yousign
             $response = $this->client->request($method, $uri, ['query' => $query, 'body' => json_encode($params)]);
             return json_decode((string) $response->getBody(), true);
         } catch(GuzzleException $e) {
-            $response = json_decode($e->getResponse()->getBody()->getContents(), true);
-
-            dd($response);
             Log::error($e->getMessage());
         }
     }
@@ -180,5 +177,26 @@ class Yousign
         return $this->makeRequest('put', "authentications/sms/{$this->formatMemberId($memberId)}", [], [
             "code" => $code,
         ]);
+    }
+
+    /**
+     * Download the signed file.
+     *
+     * @param string $fileId
+     */
+    public function downloadFile($fileId)
+    {
+        return $this->makeRequest('get', "files/{$fileId}/download");
+    }
+
+    /**
+     * Download the signed file.
+     *
+     * @param string $fileId
+     * @return array
+     */
+    public function getFileInfo($fileId)
+    {
+        return $this->makeRequest('get', "files/{$fileId}");
     }
 }

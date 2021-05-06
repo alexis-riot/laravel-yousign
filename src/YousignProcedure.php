@@ -62,7 +62,7 @@ class YousignProcedure
         return [
             "file" => $file['id'],
             "page" => $file['page'] ?? 1,
-            "position" => is_string($file['position']) ? $file['position'] : "230,499,464,589",
+            "position" => is_string($file['position']) ? $file['position'] : "341,705,556,754",
             "mention" => $file['mention'] ?? "",
             "mention2" => $file['mention2'] ?? "",
         ];
