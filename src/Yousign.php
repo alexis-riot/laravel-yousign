@@ -167,6 +167,24 @@ class Yousign
     }
 
     /**
+     * Create an Email operation that will send an email to the member with the code.
+     *
+     * @param null|array $query
+     * @return array
+     */
+    public function createOperationEmail($memberId)
+    {
+        return $this->makeRequest('post', 'operations', [], [
+            "mode" => "email",
+            "type" => "accept",
+            "members" => [
+                "/members/{$this->formatMemberId($memberId)}",
+            ],
+            "metadata" => [],
+        ]);
+    }
+
+    /**
      * Validate the SMS code received.
      *
      * @param null|array $query
@@ -175,6 +193,19 @@ class Yousign
     public function authenticateSMS($memberId, $code)
     {
         return $this->makeRequest('put', "authentications/sms/{$this->formatMemberId($memberId)}", [], [
+            "code" => $code,
+        ]);
+    }
+
+    /**
+     * Validate the Email code received.
+     *
+     * @param null|array $query
+     * @return array
+     */
+    public function authenticateEmail($memberId, $code)
+    {
+        return $this->makeRequest('put', "authentications/email/{$this->formatMemberId($memberId)}", [], [
             "code" => $code,
         ]);
     }

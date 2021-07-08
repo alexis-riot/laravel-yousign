@@ -17,6 +17,16 @@ class YousignProcedure
             "name" => "",
             "description" => "",
             "members" => [],
+            "config" => [
+                "webhook" => [
+                    "procedure.finished" => [
+                        [
+                            "url" => null,
+                            "method" => "GET",
+                        ]
+                    ]
+                ]
+            ],
         ];
     }
 
@@ -30,10 +40,24 @@ class YousignProcedure
         return $this;
     }
 
+    public function withWebhook($url) {
+        $this->datas->config['webhook']['procedure.finished'][0]['url'] = $url;
+        return $this;
+    }
+
     public function addMember($user, $files) {
         $user = (object) $user;
 
         array_push($this->datas->members, [
+            "operationLevel" => "custom",
+            "operationCustomModes" => [$user->operationCustomModes],
+            "operationModeSmsConfig" => [
+                "content" => "SIGNATURE - {{code}} est votre code de sécurité pour signer le document.",
+            ],
+            "operationModeEmailConfig" => [
+                "subject" => "Your security code",
+                "content" => "SIGNATURE - {{code}} est votre code de sécurité pour signer le document.",
+            ],
             "firstname" => $user->firstname,
             "lastname" => $user->lastname,
             "email" => $user->email,
