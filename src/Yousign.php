@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Log;
 class Yousign
 {
     /**
-     * @const string
+     * @const array
      */
     const BASE_URI = [
-        'production' => "https://api.yousign.com",
-        'staging' => "https://staging-api.yousign.com",
+        'production' => 'https://api.yousign.com',
+        'staging' => 'https://staging-api.yousign.com',
     ];
 
     /**
@@ -69,7 +69,6 @@ class Yousign
         $this->apiKey = $apiKey;
     }
 
-
     /**
      * @param string $apiEnv
      */
@@ -99,8 +98,9 @@ class Yousign
     {
         try {
             $response = $this->client->request($method, $uri, ['query' => $query, 'body' => json_encode($params)]);
+
             return json_decode((string) $response->getBody(), true);
-        } catch(GuzzleException $e) {
+        } catch (GuzzleException $e) {
             Log::error($e->getMessage());
         }
     }
@@ -144,8 +144,9 @@ class Yousign
      * @param string $memberId
      * @return string
      */
-    private function formatMemberId(string $memberId) {
-        return str_replace("/members/", "", $memberId);
+    private function formatMemberId(string $memberId)
+    {
+        return str_replace('/members/', '', $memberId);
     }
 
     /**
@@ -157,12 +158,12 @@ class Yousign
     public function createOperationSMS($memberId)
     {
         return $this->makeRequest('post', 'operations', [], [
-            "mode" => "sms",
-            "type" => "accept",
-            "members" => [
+            'mode' => 'sms',
+            'type' => 'accept',
+            'members' => [
                 "/members/{$this->formatMemberId($memberId)}",
             ],
-            "metadata" => [],
+            'metadata' => [],
         ]);
     }
 
@@ -175,12 +176,12 @@ class Yousign
     public function createOperationEmail($memberId)
     {
         return $this->makeRequest('post', 'operations', [], [
-            "mode" => "email",
-            "type" => "accept",
-            "members" => [
+            'mode' => 'email',
+            'type' => 'accept',
+            'members' => [
                 "/members/{$this->formatMemberId($memberId)}",
             ],
-            "metadata" => [],
+            'metadata' => [],
         ]);
     }
 
@@ -193,7 +194,7 @@ class Yousign
     public function authenticateSMS($memberId, $code)
     {
         return $this->makeRequest('put', "authentications/sms/{$this->formatMemberId($memberId)}", [], [
-            "code" => $code,
+            'code' => $code,
         ]);
     }
 
@@ -206,7 +207,7 @@ class Yousign
     public function authenticateEmail($memberId, $code)
     {
         return $this->makeRequest('put', "authentications/email/{$this->formatMemberId($memberId)}", [], [
-            "code" => $code,
+            'code' => $code,
         ]);
     }
 
