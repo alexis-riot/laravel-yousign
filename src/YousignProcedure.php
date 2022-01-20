@@ -4,114 +4,155 @@ namespace AlexisRiot\Yousign;
 
 class YousignProcedure
 {
-    private $datas;
+    private $data;
 
     private $request;
 
-    public function __construct()
+    /**
+     * Instantiate a new procedure instance.
+     *
+     * @param  string $name
+     * @param  string $description
+     * @return void
+     */
+    public function __construct(string $name = '', string $description = '')
     {
-        $this->datas = (object) [
-            'name' => '',
-            'description' => '',
+        $this->data = (object) [
+            'name' => $name,
+            'description' => $description,
             'members' => [],
-            'config' => [
-                'webhook' => [
-                    'procedure.finished' => [
-                        [
-                            'url' => null,
-                            'method' => 'GET',
-                        ],
-                    ],
-                ],
-            ],
+            'config' => [],
         ];
     }
 
+    /**
+     * Add a name to the procedure.
+     *
+     * @param  string $name
+     * @return self
+     */
     public function withName($name)
     {
-        $this->datas->name = $name;
+        $this->data->name = $name;
 
         return $this;
     }
 
+    /**
+     * Add a description to the procedure.
+     *
+     * @param  string $description
+     * @return self
+     */
     public function withDescription($description)
     {
-        $this->datas->description = $description;
+        $this->data->description = $description;
 
         return $this;
     }
 
-    public function withWebhook($url)
+    /**
+     * Add webhooks to the procedure.
+     *
+     * @param  mixed $hooks
+     * @param  string $url
+     * @return self
+     */
+    public function withWebhook(mixed $hooks, string $url)
     {
-        $this->datas->config['webhook']['procedure.finished'][0]['url'] = $url;
+        if (! is_array($hooks)) {
+            $hooks = [$hooks];
+        }
+
+        foreach ($hooks as $hook) {
+            $this->data->config['webhook'][$hook][] = [
+                'url' => $url,
+                'method' => 'GET',
+            ];
+        }
 
         return $this;
     }
 
+    /**
+     * Add a member to the procedure.
+     *
+     * @param  array $user
+     * @param  array $files
+     * @return self
+     */
     public function addMember($user, $files)
     {
         $user = (object) $user;
 
-        array_push($this->datas->members, [
+        array_push($this->data->members, [
             'operationLevel' => 'custom',
-            'operationCustomModes' => [$user->operationCustomModes],
+            'operationCustomModes' => [
+                $user->operationCustomModes ?: 'sms',
+            ],
             'operationModeSmsConfig' => [
-                'content' => 'SIGNATURE - {{code}} est votre code de sécurité pour signer le document.',
+                'content' => trans('yousign::yousign.sms_security_code'),
             ],
             'operationModeEmailConfig' => [
-                'subject' => 'Your security code',
-                'content' => 'SIGNATURE - {{code}} est votre code de sécurité pour signer le document.',
+                'subject' => trans('yousign::yousign.email_security_code.subject'),
+                'content' => trans('yousign::yousign.email_security_code.content'),
             ],
             'firstname' => $user->firstname,
             'lastname' => $user->lastname,
             'email' => $user->email,
             'phone' => $user->phone,
-            'fileObjects' => $this->loopFiles($files),
+            'fileObjects' => $this->getFileObjects($files),
         ]);
 
         return $this;
     }
 
-    private function loopFiles($files)
+    /**
+     * Extract fileObjects from file array.
+     *
+     * @param  array $files
+     * @return array
+     */
+    private function getFileObjects($files)
     {
-        $datas = [];
+        $data = [];
 
         if (isset($files['id'])) {
-            array_push($datas, $this->pushFile($files));
-        } else {
-            foreach ($files as $file) {
-                array_push($datas, $this->pushFile($file));
-            }
+            $files = [$files];
         }
 
-        return $datas;
+        foreach ($files as $file) {
+            $fileObjects = [
+                'file' => $file['id'],
+                'page' => $file['options']['page'] ?? 1,
+                'position' => $file['options']['position'] ?? '341,705,556,754',
+                'mention' => $file['options']['mention'] ?? '',
+                'mention2' => $file['options']['mention2'] ?? '',
+            ];
+
+            $data[] = $fileObjects;
+        }
+
+        return $data;
     }
 
-    private function pushFile($file)
-    {
-        return [
-            'file' => $file['id'],
-            'page' => $file['page'] ?? 1,
-            'position' => is_string($file['position']) ? $file['position'] : '341,705,556,754',
-            'mention' => $file['mention'] ?? '',
-            'mention2' => $file['mention2'] ?? '',
-        ];
-    }
-
+    /**
+     * Create a basic procedure
+     *
+     * @return void
+     */
     public function create()
     {
-        return $this->request = \AlexisRiot\Yousign\Facades\Yousign::createBasicProcedure((array) $this->datas);
+        return $this->request = \AlexisRiot\Yousign\Facades\Yousign::createBasicProcedure((array) $this->data);
     }
 
-    public function getMember(): object
+    /**
+     * Get the members for the procedure.
+     *
+     * @return array
+     */
+    public function getMembers()
     {
-        return count($this->request['members']) === 1
-            ? (object) $this->request['members'][0]
-            : (object) $this->request['members'];
-    }
-
-    public function request()
-    {
-        return $this->request;
+        return $this->request['members'];
     }
 }

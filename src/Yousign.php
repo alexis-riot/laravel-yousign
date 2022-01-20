@@ -11,9 +11,17 @@ class Yousign
     /**
      * @const array
      */
-    const BASE_URI = [
+    const API_URL = [
         'production' => 'https://api.yousign.com',
         'staging' => 'https://staging-api.yousign.com',
+    ];
+
+    /**
+     * @const array
+     */
+    const APP_URL = [
+        'production' => 'https://app.yousign.com',
+        'staging' => 'https://staging-app.yousign.com',
     ];
 
     /**
@@ -50,7 +58,15 @@ class Yousign
      */
     protected function getBaseURL()
     {
-        return self::BASE_URI[$this->apiEnv];
+        return self::API_URL[$this->apiEnv];
+    }
+
+    /**
+     * @return string
+     */
+    protected function getBaseAppURL()
+    {
+        return self::APP_URL[$this->apiEnv];
     }
 
     /**
@@ -62,7 +78,7 @@ class Yousign
     }
 
     /**
-     * @param string $apiKey
+     * @param  string $apiKey
      */
     protected function setApiKey($apiKey)
     {
@@ -70,7 +86,7 @@ class Yousign
     }
 
     /**
-     * @param string $apiEnv
+     * @param  string $apiEnv
      */
     public function setApiEnv($apiEnv)
     {
@@ -88,10 +104,10 @@ class Yousign
     /**
      * Make request.
      *
-     * @param string $method
-     * @param string $uri
-     * @param null|array $query
-     * @param null|array $params
+     * @param  string $method
+     * @param  string $uri
+     * @param  null|array $query
+     * @param  null|array $params
      * @return array
      */
     protected function makeRequest(string $method, string $uri, array $query = [], array $params = [])
@@ -99,7 +115,11 @@ class Yousign
         try {
             $response = $this->client->request($method, $uri, ['query' => $query, 'body' => json_encode($params)]);
 
-            return json_decode((string) $response->getBody(), true);
+            if ($response->getHeaderLine('Content-Type') === 'application/pdf') {
+                return $response->getBody()->getContents();
+            }
+
+            return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             Log::error($e->getMessage());
         }
@@ -108,7 +128,7 @@ class Yousign
     /**
      * Lists all users.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function getUsers()
@@ -119,7 +139,7 @@ class Yousign
     /**
      * Send file for procedure.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function createFile(array $params = [])
@@ -128,9 +148,9 @@ class Yousign
     }
 
     /**
-     * Lists all users.
+     * Create a basic procedure.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function createBasicProcedure(array $params = [])
@@ -139,9 +159,9 @@ class Yousign
     }
 
     /**
-     * Lists all users.
+     * Format a member ID.
      *
-     * @param string $memberId
+     * @param  string $memberId
      * @return string
      */
     private function formatMemberId(string $memberId)
@@ -150,9 +170,20 @@ class Yousign
     }
 
     /**
+     * Format a file ID.
+     *
+     * @param  string $fileId
+     * @return string
+     */
+    private function formatFileId(string $fileId)
+    {
+        return str_replace('/files/', '', $fileId);
+    }
+
+    /**
      * Create an SMS operation that will send an SMS to the member with the code.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function createOperationSMS($memberId)
@@ -170,7 +201,7 @@ class Yousign
     /**
      * Create an Email operation that will send an email to the member with the code.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function createOperationEmail($memberId)
@@ -188,7 +219,7 @@ class Yousign
     /**
      * Validate the SMS code received.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function authenticateSMS($memberId, $code)
@@ -201,7 +232,7 @@ class Yousign
     /**
      * Validate the Email code received.
      *
-     * @param null|array $query
+     * @param  null|array $query
      * @return array
      */
     public function authenticateEmail($memberId, $code)
@@ -214,21 +245,40 @@ class Yousign
     /**
      * Download the signed file.
      *
-     * @param string $fileId
+     * @param  string $fileId
+     * @param  bool $media
+     * @return mixed
      */
-    public function downloadFile($fileId)
+    public function downloadFile($fileId, $media = false)
     {
-        return $this->makeRequest('get', "files/{$fileId}/download");
+        $query = [];
+
+        if ($media) {
+            $query['alt'] = 'media';
+        }
+
+        return $this->makeRequest('get', "files/{$this->formatFileId($fileId)}/download", $query);
     }
 
     /**
      * Download the signed file.
      *
-     * @param string $fileId
+     * @param  string $fileId
      * @return array
      */
     public function getFileInfo($fileId)
     {
-        return $this->makeRequest('get', "files/{$fileId}");
+        return $this->makeRequest('get', "files/{$this->formatFileId($fileId)}");
+    }
+
+    /**
+     * Get the iframe URL
+     *
+     * @param  string $memberId
+     * @return array
+     */
+    public function getIframeURL($memberId)
+    {
+        return $this->getBaseAppURL()."/procedure/sign?members={$memberId}";
     }
 }

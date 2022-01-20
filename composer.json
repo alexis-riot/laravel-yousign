@@ -1,5 +1,5 @@
 {
-    "name": "alexis-riot/laravel-yousign",
+    "name": "marcbelletre/laravel-yousign",
     "description": "Laravel wrapper for the YouSign API",
     "keywords": [
         "laravel",
@@ -11,6 +11,10 @@
         {
             "name": "Alexis Riot",
             "email": "contact@alexisriot.fr"
+        },
+        {
+            "name": "Marc Bellêtre",
+            "email": "marc.belletre@gmail.com"
         }
     ],
     "require": {

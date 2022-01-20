@@ -16,6 +16,12 @@ class YousignServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/yousign.php' => config_path('yousign.php'),
         ], 'config');
+
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'yousign');
+
+        $this->publishes([
+            __DIR__.'/../resources/lang' => resource_path('lang/vendor/yousign'),
+        ], 'translation');
     }
 
     /**
