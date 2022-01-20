@@ -15,6 +15,11 @@ You must publish the config file with:
 php artisan vendor:publish --provider="AlexisRiot\Yousign\YousignServiceProvider" --tag="config"
 ```
 
+You can also publish the translation files if you would like to translate in another language:
+```bash
+php artisan vendor:publish --provider="AlexisRiot\Yousign\YousignServiceProvider" --tag="translation"
+```
+
 This is the contents of the config file that will be published at `config/yousign.php`:
 
 ```php
@@ -47,7 +52,7 @@ $file = Yousign::createFile([
 ]);
 ```
 
-Create a procedure:  
+Create a procedure:
 _The creation of a procedure is fully dynamic, you can add multiple members and multiple files._
 ```php
 use AlexisRiot\Yousign\Facades\Yousign;
@@ -68,7 +73,7 @@ $procedure
         'email' => "contact@alexisriot.fr",
         'phone' => "+33 600000000",
     ], [$file])
-    ->send();
+    ->create();
 ```
 
 ## License

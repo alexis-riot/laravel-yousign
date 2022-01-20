@@ -1,5 +1,5 @@
 {
-    "name": "alexis-riot/laravel-yousign",
+    "name": "marcbelletre/laravel-yousign",
     "description": "Laravel wrapper for the YouSign API",
     "keywords": [
         "laravel",
@@ -11,11 +11,15 @@
         {
             "name": "Alexis Riot",
             "email": "contact@alexisriot.fr"
+        },
+        {
+            "name": "Marc Bellêtre",
+            "email": "marc.belletre@gmail.com"
         }
     ],
     "require": {
-	    "guzzlehttp/guzzle": "^7.0.1",
-        "php": "^7.3|^8.0"
+        "php": "^7.3|^8.0",
+        "guzzlehttp/guzzle": "^7.0.1"
     },
     "autoload": {
         "psr-4": {
